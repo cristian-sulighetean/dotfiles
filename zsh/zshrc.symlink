@@ -29,8 +29,9 @@ do
 done
 
 # initialize autocomplete here, otherwise functions won't be loaded
+# Skip completions that point to non-existent files (e.g., broken Docker Desktop symlinks)
 autoload -U compinit
-compinit
+compinit -i
 
 # load every completion after autocomplete loads
 for file in ${(M)config_files:#*/completion.zsh}

@@ -27,6 +27,28 @@ above and see what components may mesh up with you.
 [Fork it](https://github.com/holman/dotfiles/fork), remove what you don't
 use, and build on what you do use.
 
+### Available Modules
+
+- **[aws/](aws/)** - AWS CLI aliases, profile switching, and helper functions
+- **[kubernetes/](kubernetes/)** - kubectl aliases, context switching, and cluster management
+- **[terraform/](terraform/)** - Terraform workflow aliases and environment config
+- **atuin/** - Shell history management and sync
+- **docker/** - Docker and Docker Compose shortcuts
+- **git/** - Git aliases, configuration, and completions
+- **homebrew/** - Homebrew setup and management
+- **system/** - System-wide aliases and environment settings
+- **vim/** - Vim configuration
+- **zsh/** - ZSH configuration and customization
+
+Each module directory may contain:
+- `aliases.zsh` - Command shortcuts
+- `env.zsh` - Environment variables and functions
+- `path.zsh` - PATH modifications
+- `completion.zsh` - Shell auto-completion
+- `*.symlink` - Files to symlink to `$HOME`
+- `install.sh` - Module-specific installation script
+- `README.md` - Module documentation
+
 ## components
 
 There's a few special files in the hierarchy.
@@ -58,13 +80,140 @@ script/bootstrap
 This will symlink the appropriate files in `.dotfiles` to your home directory.
 Everything is configured and tweaked within `~/.dotfiles`.
 
+**Note:** If you're cloning to a directory other than `~/.dotfiles`, you'll need to create a symlink:
+```sh
+ln -s ~/dotfiles ~/.dotfiles
+```
+
+### Installing Dependencies
+
+After running `bootstrap`, install all tools and applications via Homebrew:
+
+```sh
+cd ~/.dotfiles
+script/install
+```
+
+This will:
+1. Install Homebrew (if not already installed)
+2. Install all packages listed in the `Brewfile`
+3. Run any module-specific `install.sh` scripts
+
+### What Gets Installed
+
+The `Brewfile` includes:
+- **CLI Tools**: kubectl, terraform, awscli, helm, k9s, wget, imagemagick, atuin, and more
+- **GUI Apps**: (macOS only) ghostty, vscode, vlc, etc.
+
+### Configuration
+
 The main file you'll want to change right off the bat is `zsh/zshrc.symlink`,
 which sets up a few paths that'll be different on your particular machine.
 
-`dot` is a simple script that installs some dependencies, sets sane macOS
-defaults, and so on. Tweak this script, and occasionally run `dot` from
-time to time to keep your environment fresh and up-to-date. You can find
-this script in `bin/`.
+For private/local settings (API keys, etc.), create `~/.localrc`:
+```bash
+# ~/.localrc (not tracked in git)
+export AWS_DEFAULT_REGION="eu-central-1"
+export GITHUB_TOKEN="your-token"
+```
+
+## usage
+
+Once installed, simply open a new terminal or run:
+
+```bash
+source ~/.zshrc
+```
+
+All your aliases, functions, and environment variables from all modules will be loaded automatically.
+
+### Quick Examples
+
+```bash
+# Git shortcuts (from git/)
+gs          # git status
+gco main    # git checkout main
+glog        # pretty git log
+
+# AWS shortcuts (from aws/)
+awsinfo     # show current AWS identity
+awsswitch production  # switch AWS profile
+ec2running  # list running EC2 instances
+
+# Terraform shortcuts (from terraform/)
+tfi         # terraform init
+tfp         # terraform plan
+tfa         # terraform apply
+
+# Kubernetes shortcuts (from kubernetes/)
+k get pods  # kubectl get pods
+kctxswitch  # switch contexts
+kinfo       # show cluster info
+
+# Docker shortcuts (from docker/)
+d ps        # docker ps
+dc up       # docker-compose up
+```
+
+See each module's README for complete documentation.
+
+## creating new modules
+
+Adding a new tool to your dotfiles is easy:
+
+1. **Create a directory** for your topic:
+   ```bash
+   mkdir ~/.dotfiles/python
+   ```
+
+2. **Add configuration files**:
+   ```bash
+   # Aliases
+   echo "alias py='python3'" > ~/.dotfiles/python/aliases.zsh
+   
+   # Environment setup
+   echo "export PYTHONDONTWRITEBYTECODE=1" > ~/.dotfiles/python/env.zsh
+   
+   # Completion
+   echo "# Python completion here" > ~/.dotfiles/python/completion.zsh
+   ```
+
+3. **Add to Brewfile** (optional):
+   ```ruby
+   brew 'python@3.11'
+   ```
+
+4. **Install and reload**:
+   ```bash
+   brew bundle
+   source ~/.zshrc
+   ```
+
+That's it! The dotfiles framework automatically discovers and loads all `.zsh` files.
+
+### Module File Types
+
+- **`path.zsh`** - Loaded **first**, modifies `$PATH`
+- **`*.zsh`** - Loaded **second** (aliases, env, etc.)
+- **`completion.zsh`** - Loaded **last**, sets up auto-completion
+- **`*.symlink`** - Symlinked to `$HOME` (e.g., `.gitconfig`)
+- **`install.sh`** - Runs during `script/install` (use `.sh` to prevent auto-loading)
+- **`README.md`** - Documentation for your module
+
+## updating
+
+Keep your dotfiles fresh:
+
+```bash
+cd ~/.dotfiles
+git pull
+
+# Update packages
+brew bundle
+
+# Reload shell
+source ~/.zshrc
+```
 
 ## bugs
 
