@@ -6,8 +6,14 @@ set -e
 
 cd "$(dirname $0)"/..
 
-echo "› brew bundle"
-brew bundle
+# Use the appropriate Brewfile based on OS
+if [ "$(uname -s)" = "Darwin" ]; then
+  echo "› brew bundle (macOS)"
+  brew bundle
+else
+  echo "› brew bundle (Linux)"
+  brew bundle --file=Brewfile.linux
+fi
 
 # find the installers and run them iteratively
 find . -name install.sh | while read installer ; do sh -c "${installer}" ; done
